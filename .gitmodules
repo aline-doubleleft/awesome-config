@@ -1,0 +1,9 @@
+[submodule "themes"]
+	path = themes
+	url = https://github.com/mikar/awesome34-themes
+[submodule "shifty"]
+	path = shifty
+	url = git://github.com/masterkorp/awesome-shifty.git
+[submodule "menubar"]
+	path = menubar
+	url = git@github.com:alexander-yakushev/menubar.git
