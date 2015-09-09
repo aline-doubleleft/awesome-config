@@ -9,50 +9,18 @@ require("beautiful")
 require("naughty")
 -- shifty - dynamic tagging library
 require("shifty")
-require("menubar")
-
--- Farhavens volume widget
-cardid  = 0
-channel = "Master"
-function volume (mode, widget)
-        if mode == "update" then
-              local fd = io.popen("amixer -c " .. cardid .. " -- sget " .. channel)
-              local status = fd:read("*all")
-              fd:close()
-                
-                local volume = string.match(status, "(%d?%d?%d)%%")
-                volume = string.format("% 3d", volume)
- 
-                status = string.match(status, "%[(o[^%]]*)%]")
- 
-                if string.find(status, "on", 1, true) then
-                        widget:bar_properties_set("vol", {["bg"] = "#000000"})
-                else
-                        widget:bar_properties_set("vol", {["bg"] = "#cc3333"})
-                end
-                widget:bar_data_add("vol", volume)
-        elseif mode == "up" then
-                io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%+"):read("*all")
-                volume("update", widget)
-        elseif mode == "down" then
-                io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%-"):read("*all")
-                volume("update", widget)
-        else
-                io.popen("amixer -c " .. cardid .. " sset " .. channel .. " toggle"):read("*all")
-                volume("update", widget)
-        end
-end
+-- Vicious 
+vicious = require("vicious")
 
 
 -- useful for debugging, marks the beginning of rc.lua exec
 print("Entered rc.lua: " .. os.time())
 
 -- Variable definitions
+awesome_home = os.getenv("HOME") .. "/.config/awesome"
 -- Themes define colours, icons, and wallpapers
 -- The default is a dark theme
-home = os.getenv("HOME")
-xdg_home = home .. "/.config"
-theme_path = xdg_home .. "/awesome/themes/rainbow/theme.lua"
+theme_path = awesome_home .. "/themes/redhalo/theme.lua"
 -- Uncommment this for a lighter theme
 -- theme_path = "/usr/share/awesome/themes/sky/theme"
 
@@ -62,9 +30,15 @@ beautiful.init(theme_path)
 -- This is used later as the default terminal and editor to run.
 browser = "firefox"
 mail = "thunderbird"
-terminal = "urxvtc"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
+
+-- Vicious widgets
+-- Initialize widget
+datewidget = widget({ type = "textbox", align = "right" })
+-- Register widget
+vicious.register(datewidget, vicious.widgets.date, " %a %b %d, %R ", 60)
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -72,72 +46,6 @@ editor_cmd = terminal .. " -e " .. editor
 -- Mod4 to another key using xmodmap or other tools.  However, you can use
 -- another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
-
-awful.util.spawn_with_shell("xcompmgr -cF &")
-menubar.cache_entries = true
-menubar.app_folders = { "/usr/share/applications/" }
-menubar.show_categories = true   -- Change to false if you want only programs to appear in the menu
-menubar.set_icon_theme("gnome")
-
-separator = widget({ type = "textbox" })
-separator.text = " "
-
-mpdtextbox = widget({ type = "textbox", align = "left" })
-function mpdcron (mpdinf)
-   local mpdtext = ""
-   if (mpdinf.state=="play") then
-       mpdtext = mpdinf.artist .. " - " .. mpdinf.title
-   elseif (mpdinf.state=="pause") then
-       mpdtext = " [[[ " .. mpdinf.artist .. " - " .. mpdinf.title .. " ]]]"
-   else
-       mpdtext = " [ stopped ] "
-   end
-   mpdtextbox.text = awful.util.escape(mpdtext)
-end
-
-pb_volume = widget({ type = "progressbar", name = "pb_volume", align = "right" })
-pb_volume.width = 12
-pb_volume.height = 1
-pb_volume.border_padding = 1
-pb_volume.border_width = 1
-pb_volume.ticks_count = 8
-pb_volume.gap = 0
-pb_volume.vertical = true
-pb_volume:bar_properties_set("vol", 
-{ 
-  ["bg"] = "#000000",
-  ["fg"] = "green",
-  ["fg_center"] = "yellow",
-  ["fg_end"] = "red",
-  ["fg_off"] = "black",
-  ["border_color"] = "#999933",
-  ["min_value"] = 0,
-  ["max_value"] = 100,
-  ["reverse"] = false
-})
-volume("update", pb_volume)
-
-timer_volume = timer({ timeout = 10 })
-timer_volume:add_signal("timeout", function() volume("update", pb_volume) end)
-timer_volume:start()
-
---- Mail updater
-mymail = widget({ type = "textbox", align = "right" })
-mymail.text = "?"
-
-awful.hooks.timer.register(30, function ()
-    local f = io.open(home .. "/tmp/gmail") 
-    local l = nil
-    if f ~= nil then
-       l = f:read() -- read output of command
-    else
-       l = "?"
-    end
-    f:close()
-
-    mymail.text = l
-    os.execute("~/bin/unread.py > ~/tmp/gmail &")
-end)
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -160,7 +68,7 @@ use_titlebar = false
 -- Shifty configured tags.
 shifty.config.tags = {
     w1 = {
-        layout    = awful.layout.suit.tile.bottom,
+        layout    = awful.layout.suit.max,
         mwfact    = 0.60,
         exclusive = false,
         position  = 1,
@@ -286,10 +194,6 @@ shifty.config.defaults = {
     guess_position = true,
 }
 
---  Wibox
--- Create a textbox widget
-mytextclock = awful.widget.textclock({align = "right"})
-
 -- Create a laucher widget and a main menu
 myawesomemenu = {
     {"manual", terminal .. " -e man awesome"},
@@ -386,15 +290,8 @@ for s = 1, screen.count() do
             layout = awful.widget.layout.horizontal.leftright
         },
         mylayoutbox[s],
-        mytextclock,
+        datewidget,
         s == 1 and mysystray or nil,
-        separator,
-        pb_volume,
-        separator,
-        mymail,
-        separator,
-        mpdtextbox,
-        separator,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
         }
@@ -498,15 +395,7 @@ globalkeys = awful.util.table.join(
         mypromptbox[mouse.screen].widget,
         awful.util.eval, nil,
         awful.util.getdir("cache") .. "/history_eval")
-        end),
-    
-    -- Menubar
-    awful.key({ modkey }, "s", function () menubar.show() end),
-
-    -- Volume keybindings
-    awful.key({ }, "XF86AudioRaiseVolume",function () volume("up", pb_volume) end),
-    awful.key({ }, "XF86AudioLowerVolume",function  () volume("down", pb_volume) end),
-    awful.key({ }, "XF86AudioMute",function  () volume("mute", pb_volume) end)
+        end)
     )
 
 -- Client awful tagging: this is useful to tag some clients and then do stuff
@@ -573,3 +462,12 @@ client.add_signal("unfocus", function(c)
         c.border_color = beautiful.border_normal
     end
 end)
+
+-- Auto-execute dex
+local xresources_name = "awesome.started"
+local xresources = awful.util.pread("xrdb -query")
+if not xresources:match(xresources_name) then
+    -- Execute once for X server
+    os.execute("dex -a -e Awesome")
+end
+awful.util.spawn_with_shell("xrdb -merge <<< " .. "'" .. xresources_name .. ": true'")
