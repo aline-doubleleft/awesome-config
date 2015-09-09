@@ -30,15 +30,39 @@ beautiful.init(theme_path)
 -- This is used later as the default terminal and editor to run.
 browser = "firefox"
 mail = "thunderbird"
-terminal = "urxvt"
+terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
+spacer = widget({ type = "textbox" })
+spacer.text = " "
+
 -- Vicious widgets
--- Initialize widget
-datewidget = widget({ type = "textbox", align = "right" })
--- Register widget
-vicious.register(datewidget, vicious.widgets.date, " %a %b %d, %R ", 60)
+-- Date and Time
+datewidget = widget({ type = "textbox" })
+vicious.register(datewidget, vicious.widgets.date, "%a %b %d, %R", 60)
+
+-- Memory
+memwidget = widget({ type = "textbox" })
+vicious.register(memwidget, vicious.widgets.mem, "$1% ($2MB/$3MB)", 13)
+
+-- CPU Usage
+cpuwidget = awful.widget.graph()
+cpuwidget:set_width(50)
+cpuwidget:set_background_color("#494B4F")
+cpuwidget:set_color("#FF5656")
+cpuwidget:set_gradient_colors({ "#FF5656", "#88A175", "#AECF96" })
+vicious.register(cpuwidget, vicious.widgets.cpu, "$1")
+
+-- Audio volume
+volwidget = widget({ type = "textbox" })
+volwidget:buttons(awful.util.table.join(
+    awful.button({ }, 1, function () awful.util.spawn("amixer -q set Master toggle", false) end),
+    awful.button({ }, 3, function () awful.util.spawn(terminal .. "-e alsamixer", true)   end),
+    awful.button({ }, 4, function () awful.util.spawn("amixer -q set PCM 2dB+", false) end),
+    awful.button({ }, 5, function () awful.util.spawn("amixer -q set PCM 2dB-", false) end)
+ ))
+vicious.register(volwidget, vicious.widgets.volume, " $1% ", 2, "PCM")
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -195,9 +219,6 @@ shifty.config.defaults = {
 }
 
 --  Wibox
--- Create a textbox widget
-mytextclock = awful.widget.textclock({align = "right"})
-
 -- Create a laucher widget and a main menu
 myawesomemenu = {
     {"manual", terminal .. " -e man awesome"},
@@ -218,7 +239,7 @@ mylauncher = awful.widget.launcher({image = image(beautiful.awesome_icon),
                                      menu = mymainmenu})
 
 -- Create a systray
-mysystray = widget({type = "systray", align = "right"})
+mysystray = widget({ type = "systray" })
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -294,8 +315,11 @@ for s = 1, screen.count() do
             layout = awful.widget.layout.horizontal.leftright
         },
         mylayoutbox[s],
-        datewidget,
-        s == 1 and mysystray or nil,
+        datewidget, spacer,
+        s == 1 and mysystray or nil, spacer,
+        memwidget, spacer,
+        cpuwidget.widget, spacer,
+        volwidget, spacer,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
         }
@@ -417,7 +441,16 @@ clientkeys = awful.util.table.join(
         function(c)
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
-        end)
+        end),
+
+    -- Multimedia
+    awful.key({ }, "XF86AudioRaiseVolume", function ()
+       awful.util.spawn("amixer set Master 9%+", false) end),
+    awful.key({ }, "XF86AudioLowerVolume", function ()
+       awful.util.spawn("amixer set Master 9%-", false) end),
+    awful.key({ }, "XF86AudioMute", function ()
+       awful.util.spawn("amixer set Master toggle", false) end)
+
 )
 
 -- SHIFTY: assign client keys to shifty for use in
