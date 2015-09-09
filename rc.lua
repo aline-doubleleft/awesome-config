@@ -36,7 +36,7 @@ editor_cmd = terminal .. " -e " .. editor
 
 -- Vicious widgets
 -- Initialize widget
-datewidget = widget({ type = "textbox" })
+datewidget = widget({ type = "textbox", align = "right" })
 -- Register widget
 vicious.register(datewidget, vicious.widgets.date, " %a %b %d, %R ", 60)
 
@@ -294,9 +294,8 @@ for s = 1, screen.count() do
             layout = awful.widget.layout.horizontal.leftright
         },
         mylayoutbox[s],
-        mytextclock,
-        s == 1 and mysystray or nil,
         datewidget,
+        s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
         }
