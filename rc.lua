@@ -1,5 +1,7 @@
 -- default rc.lua for shifty
 --
+-- package.path = package.path .. ';' .. os.getenv("HOME") .. '/.luarocks/lib/lua/5.1;'
+print(package.path)
 -- Standard awesome library
 require("awful")
 require("awful.autofocus")
@@ -11,7 +13,12 @@ require("naughty")
 require("shifty")
 -- Vicious 
 vicious = require("vicious")
+-- APW
+-- local APW = require("apw/widget")
 
+
+-- Lognotify
+-- local lognotify=require("lognotify")
 
 -- useful for debugging, marks the beginning of rc.lua exec
 print("Entered rc.lua: " .. os.time())
@@ -30,7 +37,7 @@ beautiful.init(theme_path)
 -- This is used later as the default terminal and editor to run.
 browser = "firefox"
 mail = "thunderbird"
-terminal = "urxvtc"
+terminal = "urxvtc -e tmux"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -55,14 +62,14 @@ cpuwidget:set_gradient_colors({ "#FF5656", "#88A175", "#AECF96" })
 vicious.register(cpuwidget, vicious.widgets.cpu, "$1")
 
 -- Audio volume
-volwidget = widget({ type = "textbox" })
-volwidget:buttons(awful.util.table.join(
+volmaster = widget({ type = "textbox" })
+volmaster:buttons(awful.util.table.join(
     awful.button({ }, 1, function () awful.util.spawn("amixer -q set Master toggle", false) end),
     awful.button({ }, 3, function () awful.util.spawn(terminal .. "-e alsamixer", true)   end),
-    awful.button({ }, 4, function () awful.util.spawn("amixer -q set PCM 2dB+", false) end),
-    awful.button({ }, 5, function () awful.util.spawn("amixer -q set PCM 2dB-", false) end)
+    awful.button({ }, 4, function () awful.util.spawn("amixer -q set Master 2dB+", false) end),
+    awful.button({ }, 5, function () awful.util.spawn("amixer -q set Master 2dB-", false) end)
  ))
-vicious.register(volwidget, vicious.widgets.volume, " $1% ", 2, "PCM")
+vicious.register(volmaster, vicious.widgets.volume, "Master: $1% ", 1, "Master")
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -116,8 +123,13 @@ shifty.config.tags = {
         spawn     = mail,
         slave     = true
     },
+    tools = {
+        layout    = awful.layout.suit.floating,
+        exclusive = false,
+        position  = 7,
+    },
     media = {
-        layout    = awful.layout.suit.float,
+        layout    = awful.layout.suit.floating,
         exclusive = false,
         position  = 8,
     },
@@ -135,6 +147,7 @@ shifty.config.apps = {
             "Navigator",
             "Vimperator",
             "Gran Paradiso",
+            "Chromium",
         },
         tag = "web",
     },
@@ -154,6 +167,14 @@ shifty.config.apps = {
     },
     {
         match = {
+            "calculator",
+            "FOX Calculator",
+            "pavucontrol",
+        },
+        tag = "tools",
+    },
+    {
+        match = {
             "OpenOffice.*",
             "Abiword",
             "Gnumeric",
@@ -168,6 +189,8 @@ shifty.config.apps = {
             "gtkpod",
             "Ufraw",
             "easytag",
+            "spotify",
+            "Spotify.*",
         },
         tag = "media",
         nopopup = true,
@@ -177,6 +200,10 @@ shifty.config.apps = {
             "MPlayer",
             "Gnuplot",
             "galculator",
+            "calculator",
+            "FOX Calculator",
+            "pavucontrol",
+            "spotify",
         },
         float = true,
     },
@@ -319,7 +346,8 @@ for s = 1, screen.count() do
         s == 1 and mysystray or nil, spacer,
         memwidget, spacer,
         cpuwidget.widget, spacer,
-        volwidget, spacer,
+        volmaster, spacer,
+        -- right_layout:add(APW),
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
         }
@@ -423,6 +451,10 @@ globalkeys = awful.util.table.join(
         mypromptbox[mouse.screen].widget,
         awful.util.eval, nil,
         awful.util.getdir("cache") .. "/history_eval")
+        end),
+    
+    awful.key({ }, "Print", function () 
+        awful.util.spawn_with_shell("DATE=`date +%d%m%Y_%H%M%S`; xsnap -nogui -file $HOME/Temp/xsnap$DATE") 
         end)
     )
 
@@ -434,7 +466,8 @@ clientkeys = awful.util.table.join(
     awful.key({modkey, "Control"}, "space", awful.client.floating.toggle),
     awful.key({modkey, "Control"}, "Return",
         function(c) c:swap(awful.client.getmaster()) end),
-    awful.key({modkey,}, "o", awful.client.movetoscreen),
+    awful.key({modkey,}, "o", function(c) awful.client.movetoscreen(c,c.screen-1) end ),
+     awful.key({modkey,}, "p", function(c) awful.client.movetoscreen(c,c.screen+1) end ),
     awful.key({modkey, "Shift"}, "r", function(c) c:redraw() end),
     awful.key({modkey}, "t", awful.client.togglemarked),
     awful.key({modkey,}, "m",
@@ -445,9 +478,9 @@ clientkeys = awful.util.table.join(
 
     -- Multimedia
     awful.key({ }, "XF86AudioRaiseVolume", function ()
-       awful.util.spawn("amixer set Master 9%+", false) end),
+       awful.util.spawn("amixer set Master 2%+", false) end),
     awful.key({ }, "XF86AudioLowerVolume", function ()
-       awful.util.spawn("amixer set Master 9%-", false) end),
+       awful.util.spawn("amixer set Master 2%-", false) end),
     awful.key({ }, "XF86AudioMute", function ()
        awful.util.spawn("amixer set Master toggle", false) end)
 
@@ -508,3 +541,26 @@ if not xresources:match(xresources_name) then
     os.execute("dex -a -e Awesome")
 end
 awful.util.spawn_with_shell("xrdb -merge <<< " .. "'" .. xresources_name .. ": true'")
+
+-- ilog = lognotify{
+--    logs = { mpd = { file = "/home/bob/.mpd/log", },
+--     aptitude = { file = "/var/log/aptitude", },
+--     -- Check, whether you have the permissions to read your log files!
+--     -- You can fix this by configure syslog deamon in many case.
+--     syslog    = { file = "/var/log/syslog", ignore = { "Changing fan level" },
+--     },
+--     awesome  = { file = "/home/bob/log/awesome",
+--         ignore = {
+--             "/var/lib/dpkg", -- aptwidget failure when aptitude running
+--             "wicd", "wired profiles found", -- wicd junk
+--             "seek to:", "Close unzip stream", -- gmpc junk
+--             "^nolog"},
+--         },
+--    -- Delay between checking in seconds. Default: 1
+--    interval = 1,
+--    -- Time in seconds after which popup expires. Set 0 for no timeout. Default: 0
+--    naughty_timeout = 15
+--    }
+-- }
+-- 
+-- ilog:start()
