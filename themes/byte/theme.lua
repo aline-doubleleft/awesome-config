@@ -28,19 +28,15 @@ wallpaper4    = sharedthemes .. "/default/background.png"
 wpscript      = home .. "/.wallpaper"
 
 if awful.util.file_readable(wallpaper1) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper1 }
+  theme.wallpaper = wallpaper1
 elseif awful.util.file_readable(wallpaper2) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper2 }
+  theme.wallpaper = wallpaper2
 elseif awful.util.file_readable(wpscript) then
-	theme.wallpaper_cmd = { "sh " .. wpscript }
+  theme.wallpaper_cmd = { "sh " .. wpscript }
 elseif awful.util.file_readable(wallpaper3) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper3 }
+  theme.wallpaper = wallpaper3
 else
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper4 }
-end
-
-if awful.util.file_readable(config .. "/vain/init.lua") then
-    theme.useless_gap_width  = "3"
+  theme.wallpaper = wallpaper4
 end
 --}}}
 
@@ -70,15 +66,15 @@ theme.taglist_squares_unsel = themedir .. "/taglist/unfocus.png"
 theme.layout_fairh = themedir .. "/layouts/fairh.png"
 theme.layout_fairv = themedir .. "/layouts/fairv.png"
 theme.layout_floating  = themedir .. "/layouts/floating.png"
---theme.layout_magnifier = themedir .. "/layouts/magnifier.png"
---theme.layout_max = themedir .. "/layouts/max.png"
---theme.layout_fullscreen = themedir .. "/layouts/fullscreen.png"
+theme.layout_magnifier = themedir .. "/layouts/magnifier.png"
+theme.layout_max = themedir .. "/layouts/max.png"
+theme.layout_fullscreen = themedir .. "/layouts/fullscreen.png"
 theme.layout_tilebottom = themedir .. "/layouts/tilebottom.png"
 theme.layout_tileleft   = themedir .. "/layouts/tileleft.png"
 theme.layout_tile = themedir .. "/layouts/tile.png"
 theme.layout_tiletop = themedir .. "/layouts/tiletop.png"
---theme.layout_spiral  = themedir .. "/layouts/spiral.png"
---theme.layout_dwindle = themedir .. "/layouts/dwindle.png"
+theme.layout_spiral  = themedir .. "/layouts/spiral.png"
+theme.layout_dwindle = themedir .. "/layouts/dwindle.png"
 
 -- Widget icons
 theme.widget_sep = themes .. "/icons/byte/seperator.png"

@@ -1,9 +1,14 @@
--- rainbow, by copycat-killer, awesome34 theme
+--[[
+                                   
+     Rainbow Awesome WM config 2.0 
+     github.com/copycat-killer     
+                                   
+--]]
 
---{{{ Main
 local awful = require("awful")
 awful.util = require("awful.util")
 
+--{{{ Main
 theme = {}
 
 home          = os.getenv("HOME")
@@ -28,19 +33,15 @@ wallpaper4    = sharedthemes .. "/default/background.png"
 wpscript      = home .. "/.wallpaper"
 
 if awful.util.file_readable(wallpaper1) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper1 }
+  theme.wallpaper = wallpaper1
 elseif awful.util.file_readable(wallpaper2) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper2 }
+  theme.wallpaper = wallpaper2
 elseif awful.util.file_readable(wpscript) then
-	theme.wallpaper_cmd = { "sh " .. wpscript }
+  theme.wallpaper_cmd = { "sh " .. wpscript }
 elseif awful.util.file_readable(wallpaper3) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper3 }
+  theme.wallpaper = wallpaper3
 else
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper4 }
-end
-
-if awful.util.file_readable(config .. "/vain/init.lua") then
-    theme.useless_gap_width  = "3"
+  theme.wallpaper = wallpaper4
 end
 --}}}
 
@@ -102,7 +103,5 @@ theme.layout_txt_uselesstile        = "[ut]"
 theme.layout_txt_uselesstileleft    = "[utl]"
 theme.layout_txt_uselesstiletop     = "[utt]"
 theme.layout_txt_uselesstilebottom  = "[utb]"
-
-theme.awesome_icon = themedir .. "/logo/awesome-blue.png"
 
 return theme

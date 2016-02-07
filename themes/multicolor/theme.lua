@@ -33,19 +33,15 @@ wallpaper4    = sharedthemes .. "/default/background.png"
 wpscript      = home .. "/.wallpaper"
 
 if awful.util.file_readable(wallpaper1) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper1 }
+  theme.wallpaper = wallpaper1
 elseif awful.util.file_readable(wallpaper2) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper2 }
+  theme.wallpaper = wallpaper2
 elseif awful.util.file_readable(wpscript) then
-	theme.wallpaper_cmd = { "sh " .. wpscript }
+  theme.wallpaper_cmd = { "sh " .. wpscript }
 elseif awful.util.file_readable(wallpaper3) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper3 }
+  theme.wallpaper = wallpaper3
 else
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper4 }
-end
-
-if awful.util.file_readable(config .. "/vain/init.lua") then
-    theme.useless_gap_width  = "3"
+  theme.wallpaper = wallpaper4
 end
 --}}}
 
@@ -57,7 +53,7 @@ theme.bg_normal                     = "#000000"
 theme.bg_focus                      = "#000000"
 theme.bg_urgent                     = "#000000"
 theme.fg_normal                     = "#aaaaaa"
-theme.fg_focus                      = "#ffaf5f"
+theme.fg_focus                      = "#ff8c00"
 theme.fg_urgent                     = "#af1d18"
 theme.fg_minimize                   = "#ffffff"
 theme.fg_black                      = "#424242"
@@ -122,8 +118,6 @@ theme.layout_max                    = themedir .. "/icons/max.png"
 theme.layout_fullscreen             = themedir .. "/icons/fullscreen.png"
 theme.layout_magnifier              = themedir .. "/icons/magnifier.png"
 theme.layout_floating               = themedir .. "/icons/floating.png"
-
-theme.awesome_icon = themedir .. "/logo-yellow.png"
 
 theme.layout_txt_tile               = "[t]"
 theme.layout_txt_tileleft           = "[tl]"

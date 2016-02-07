@@ -17,7 +17,7 @@ sharedthemes  = shared .. "/themes"
 themes        = config .. "/themes"
 themename     = "/matrix"
 if not awful.util.file_readable(themes .. themename .. "/theme.lua") then
-	themes = sharedthemes
+  themes = sharedthemes
 end
 themedir      = themes .. themename
 
@@ -28,19 +28,15 @@ wallpaper4    = sharedthemes .. "/default/background.png"
 wpscript      = home .. "/.wallpaper"
 
 if awful.util.file_readable(wallpaper1) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper1 }
+  theme.wallpaper = wallpaper1
 elseif awful.util.file_readable(wallpaper2) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper2 }
+  theme.wallpaper = wallpaper2
 elseif awful.util.file_readable(wpscript) then
-	theme.wallpaper_cmd = { "sh " .. wpscript }
+  theme.wallpaper_cmd = { "sh " .. wpscript }
 elseif awful.util.file_readable(wallpaper3) then
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper3 }
+  theme.wallpaper = wallpaper3
 else
-	theme.wallpaper_cmd = { "awsetbg " .. wallpaper4 }
-end
-
-if awful.util.file_readable(config .. "/vain/init.lua") then
-    theme.useless_gap_width  = "3"
+  theme.wallpaper = wallpaper4
 end
 --}}}
 
@@ -71,24 +67,31 @@ theme.menu_width    = "100"
 
 theme.taglist_squares = "true"
 
-theme.battery = themes .. "/icons/him/battery.png"
-theme.volume = themes .. "/icons/him/volume.png"
-theme.muted = themes .. "/icons/him/muted.png"
-theme.cpu = themes .. "/icons/him/cpu.png"
-theme.temp = themes .. "/icons/him/temp.png"
-theme.mail = themes .. "/icons/him/mail.png"
-theme.mem = themes .. "/icons/him/mem.png"
-theme.wireless = themes .. "/icons/him/wireless.png"
-theme.network = themes .. "/icons/him/network.png"
-theme.mpd_play = themes .. "/icons/him/mpd_play.png"
-theme.mpd_pause = themes .. "/icons/him/mpd_pause.png"
-theme.mpd_stop = themes .. "/icons/him/mpd_stop.png"
+theme.battery = themes .. "/icons/matrix/battery.png"
+theme.volume = themes .. "/icons/matrix/volume.png"
+theme.muted = themes .. "/icons/matrix/muted.png"
+theme.cpu = themes .. "/icons/matrix/cpu.png"
+theme.temp = themes .. "/icons/matrix/temp.png"
+theme.mail = themes .. "/icons/matrix/mail.png"
+theme.mem = themes .. "/icons/matrix/mem.png"
+theme.wireless = themes .. "/icons/matrix/wireless.png"
+theme.network = themes .. "/icons/matrix/network.png"
+theme.netdown = themes .. "/icons/him/down-green.png"
+theme.netup = themes .. "/icons/him/up-green.png"
+theme.mpd_play = themes .. "/icons/matrix/mpd_play.png"
+theme.mpd_pause = themes .. "/icons/matrix/mpd_pause.png"
+theme.mpd_stop = themes .. "/icons/matrix/mpd_stop.png"
 
 theme.layout_fairh = themedir .. "/layouts/fairh.png"
 theme.layout_fairv = themedir .. "/layouts/fairv.png"
 theme.layout_floating = themedir .. "/layouts/floating.png"
+theme.layout_magnifier = themedir .. "/layouts/magnifier.png"
 theme.layout_max = themedir .. "/layouts/max.png"
-theme.layout_spiral = themedir .. "../default/layouts/spiralw.png"
+theme.layout_fullscreen= themedir .. "/layouts/max.png"
+theme.layout_tileleft= themedir .. "/layouts/tileleft.png"
+theme.layout_tiletop= themedir .. "/layouts/tiletop.png"
+theme.layout_spiral = themedir .. "/layouts/spiral.png"
+theme.layout_dwindle= themedir .. "/layouts/dwindle.png"
 theme.layout_tilebottom = themedir .. "/layouts/tilebottom.png"
 theme.layout_tile = themedir .. "/layouts/tile.png"
 
