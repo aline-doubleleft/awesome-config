@@ -63,8 +63,20 @@ datewidget = wibox.widget.textbox()
 vicious.register(datewidget, vicious.widgets.date, "%a %b %d, %R", 60)
 
 -- Memory
-memwidget = wibox.widget.textbox()
-vicious.register(memwidget, vicious.widgets.mem, "$1% ($2MB/$3MB)", 13)
+-- Memory Label
+memlabel = wibox.widget.textbox()
+memlabel:set_text("Mem:")
+
+-- Memory Graphic
+memwidget = awful.widget.progressbar()
+memwidget:set_width(8)
+memwidget:set_height(10)
+memwidget:set_vertical(true)
+memwidget:set_background_color("#494B4F")
+memwidget:set_border_color(nil)
+memwidget:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#AECF96"}, {0.5, "#88A175"}, 
+                    {1, "#FF5656"}}})
+vicious.register(memwidget, vicious.widgets.mem, "$1", 13)
 
 -- CPU Usage
 cpuwidget = awful.widget.graph()
@@ -82,9 +94,26 @@ volmaster:buttons(awful.util.table.join(
     awful.button({ }, 4, function () awful.util.spawn("amixer -c 0 -q set Master 2dB+", false) end),
     awful.button({ }, 5, function () awful.util.spawn("amixer -c 0 -q set Master 2dB-", false) end)
  ))
-vicious.register(volmaster, vicious.widgets.volume, "Master: $1% ", 1, "Master")
+vicious.register(volmaster, vicious.widgets.volume, "Vol: $1% ", 1, "Master")
 
+-- Battery
+-- Battery Label
+batlabel = wibox.widget.textbox()
+batlabel:set_text("Bat:")
 
+-- Battery Graphic
+batmon = awful.widget.progressbar()
+batmon:set_width(8)
+batmon:set_vertical(true)
+batmon:set_background_color("#494b4f")
+batmon:set_border_color(nil)
+batmon:set_color({ type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#aecf96" }, { 0.5, "#88a175" }, { 1, "#ff5656" } }})
+batmon_t = awful.tooltip({ objects = { batmon.widget },})
+vicious.register(batmon, vicious.widgets.bat, "$2", 61, "BAT0")
+
+-- Thermal
+thermwidget = wibox.widget.textbox()
+vicious.register(thermwidget, vicious.widgets.thermal, "CPU: $1 °C", 30, { "thermal_zone0", "sys"}) -- ${core} ${proc}
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -372,9 +401,17 @@ for s = 1, screen.count() do
     right_layout:add(spacer)
     right_layout:add(volmaster)
     right_layout:add(spacer)
+    right_layout:add(thermwidget)
+    right_layout:add(spacer)
     right_layout:add(cpuwidget)
     right_layout:add(spacer)
+    right_layout:add(memlabel)
+    right_layout:add(spacer)
     right_layout:add(memwidget)
+    right_layout:add(spacer)
+    right_layout:add(batlabel)
+    right_layout:add(spacer)
+    right_layout:add(batmon)
     right_layout:add(spacer)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(spacer)
@@ -484,8 +521,20 @@ globalkeys = awful.util.table.join(
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
               end),
+
+    awful.key({ }, "Print", function () 
+        awful.util.spawn_with_shell("DATE=`date +%d%m%Y_%H%M%S`; xsnap -nogui -file $HOME/Temp/xsnap$DATE") 
+        end),
+
+
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end)
+    awful.key({ modkey }, "p", function() menubar.show() end),
+
+    -- Lock screen
+    awful.key({ modkey }, "l", function() 
+        awful.util.spawn("sync") 
+        awful.util.spawn("xautolock -locknow") 
+    end)
 )
 
 clientkeys = awful.util.table.join(
