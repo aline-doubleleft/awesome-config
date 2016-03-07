@@ -127,13 +127,14 @@ pb_volume:set_border_color("#999933")
 pb_volume:set_max_value(100)
 pb_volume:set_value(0)
 pb_volume:buttons(awful.util.table.join(
-    awful.button( { }, 4, function () volume("up", tb_volume) end),
-    awful.button( { }, 5, function () volume("down", tb_volume) end),
-    awful.button( { }, 1, function () volume("mute", tb_volume) end)
+    awful.button( { }, 4, function () volume("up", pb_volume) end),
+    awful.button( { }, 5, function () volume("down", pb_volume) end),
+    awful.button( { }, 1, function () volume("mute", pb_volume) end)
 ))
 volume("update", pb_volume)
-
-
+pb_timer = timer({ timeout = 10 })
+pb_timer:connect_signal("timeout", function () volume("update", pb_volume) end)
+pb_timer:start()
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layouts =
