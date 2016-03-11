@@ -13,6 +13,7 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
+local lognotify = require("lognotify")
 require("powerline")
 
 package.path = '/usr/share/spop/awesome/?.lua;' .. package.path
@@ -136,6 +137,54 @@ pb_timer = timer({ timeout = 10 })
 pb_timer:connect_signal("timeout", function () volume("update", pb_volume) end)
 pb_timer:start()
 
+-- Keyboard map indicator and changer
+kbdcfg = {}
+kbdcfg.cmd = "setxkbmap"
+kbdcfg.layout = { "br abnt2", "us intl" }
+kbdcfg.current = 1  -- us is our default layout
+kbdcfg.widget = wibox.widget.textbox()
+kbdcfg.widget:set_text(" " .. kbdcfg.layout[kbdcfg.current] .. " ")
+kbdcfg.switch = function ()
+   kbdcfg.current = kbdcfg.current % #(kbdcfg.layout) + 1
+   local t = " " .. kbdcfg.layout[kbdcfg.current] .. " "
+   kbdcfg.widget:set_text(t)
+   os.execute( kbdcfg.cmd .. t )
+end
+
+-- Mouse bindings
+kbdcfg.widget:buttons(awful.util.table.join(
+    awful.button({ }, 1, function () kbdcfg.switch() end)
+))
+
+ilog = lognotify{
+    logs = { 
+        auth = { 
+            file = "/var/log/auth.log",
+            ignore = { "DIGEST-MD5 common mech free" }
+        },
+        syslog = { 
+            file = "/var/log/syslog",
+            ignore = { "DIGEST-MD5 common mech free",
+            "kernel: vgaarb: this pci device is not a vga device",
+            "CROND" 
+            } 
+        }, 
+        xsession = { 
+            file = os.getenv("HOME") .. "/.log/xsession-errors",
+            ignore = { "libpng warning: iCCP: known incorrect sRGB profile",
+            "ERROR:background_mode_manager_aura.cc", 
+            "Fontconfig error: Cannot load default config file", 
+            "Failed to connect to session manager", 
+            "W: awesome: a_glib_poll:239", 
+            "SANDBOXED", 
+            "Looking in '/etc/xdg/parcellite/parcelliterc'" 
+            } 
+        }
+    },
+    naughty_timeout = 5
+}
+
+ilog:start()
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layouts =
 {
@@ -188,21 +237,10 @@ tyrannical.tags = {
         exclusive   = true,
         screen      = 1,
         layout      = awful.layout.suit.tile,
-        exec_once   = {"dolphin"}, --When the tag is accessed for the first time, execute this command
+        exec_once   = {"thunar"}, --When the tag is accessed for the first time, execute this command
         class  = {
             "Thunar", "Konqueror", "Dolphin", "ark", "Nautilus","emelfm"
         }
-    } ,
-    {
-        name = "Develop",
-        init        = true,
-        exclusive   = true,
-        screen      = 1,
-        clone_on    = 2, -- Create a single instance of this tag on screen 1, but also show it on screen 2
-                         -- The tag can be used on both screen, but only one at once
-        layout      = awful.layout.suit.max                          ,
-        class ={ 
-            "Kate", "KDevelop", "Codeblocks", "Code::Blocks" , "DDD", "kate4"}
     } ,
     {
         name        = "Doc",
@@ -216,14 +254,14 @@ tyrannical.tags = {
             "Xpdf"          ,                                        }
     } ,
     {
-        name        = "Mutimedia",
+        name        = "Multimedia",
         init        = false, -- This tag wont be created at startup, but will be when one of the
                              -- client in the "class" section will start. It will be created on
                              -- the client startup screen
         exclusive   = true,
-        layout      = awful.layout.suit.max,
+        layout      = awful.layout.suit.floating,
         class       = {
-            "Spotify"       , "spotify"
+            "Spotify", "spotify"
         }
     } ,
 {
@@ -234,7 +272,7 @@ tyrannical.tags = {
         exclusive   = true,
         layout      = awful.layout.suit.floating,
         class       = {
-            "Pavucontrol"       , "pavucontrol"
+            "pavucontrol"
         }
     } ,
 }
@@ -387,6 +425,7 @@ for s = 1, screen.count() do
     right_layout:add(pb_volume)
     right_layout:add(divider)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(kbdcfg.widget)
     right_layout:add(powerline_widget)
     right_layout:add(mylayoutbox[s])
 
@@ -483,7 +522,10 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86MonBrightnessDown", function ()
     awful.util.spawn("xbacklight -dec 15") end),
     awful.key({ }, "XF86MonBrightnessUp", function ()
-    awful.util.spawn("xbacklight -inc 15") end)
+    awful.util.spawn("xbacklight -inc 15") end),
+
+    -- Alt + Right Shift switches the current keyboard layout
+    awful.key({ "Mod1" }, "Shift_R", function () kbdcfg.switch() end)
 )
 
 clientkeys = awful.util.table.join(
@@ -567,6 +609,13 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { class = "gimp" },
       properties = { floating = true } },
+    --default stuff here,
+    {
+        rule = { instance = "spotify", name = "Spotify"  },
+        callback = function(c)
+        awful.client.property.set(c, "overwrite_class", "spotify")
+        end
+    }
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
