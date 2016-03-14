@@ -227,6 +227,7 @@ tyrannical.tags = {
       --icon        = "~net.png",                 -- Use this icon for the tag (uncomment with a real path)
         screen      = screen.count()>1 and 2 or 1,-- Setup on screen 2 if there is more than 1 screen, else on screen 1
         layout      = awful.layout.suit.max,      -- Use the max layout
+        exec_once   = {"chromium"}, --When the tag is accessed for the first time, execute this command
         class = {
             "Opera"         , "Firefox"        , "Rekonq"    , "Dillo"        , "Arora",
             "Chromium"      , "chromium-browser-chromium", "nightly"        , "minefield"     }
