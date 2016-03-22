@@ -252,7 +252,7 @@ tyrannical.tags = {
         layout      = awful.layout.suit.max,
         class       = {
             "Assistant"     , "Okular"         , "Evince"    , "EPDFviewer"   , "xpdf",
-            "Xpdf"          ,                                        }
+            "Xpdf"          , "Zathura"                                       }
     } ,
     {
         name        = "Multimedia",
@@ -506,6 +506,12 @@ globalkeys = awful.util.table.join(
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
               end),
+
+    awful.key({ }, "Print", function () 
+        awful.util.spawn_with_shell("DATE=`date +%d%m%Y_%H%M%S`; xsnap -nogui -file $HOME/Temp/xsnap$DATE") 
+        end),
+
+
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end),
 
