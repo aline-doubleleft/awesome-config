@@ -141,7 +141,7 @@ pb_timer:start()
 kbdcfg = {}
 kbdcfg.cmd = "setxkbmap"
 kbdcfg.layout = { "br abnt2", "us intl" }
-kbdcfg.current = 1  -- us is our default layout
+kbdcfg.current = 1  -- en is our default layout
 kbdcfg.widget = wibox.widget.textbox()
 kbdcfg.widget:set_text(" " .. kbdcfg.layout[kbdcfg.current] .. " ")
 kbdcfg.switch = function ()
@@ -164,22 +164,26 @@ ilog = lognotify{
         },
         syslog = { 
             file = "/var/log/syslog",
-            ignore = { "DIGEST-MD5 common mech free",
-            "kernel: vgaarb: this pci device is not a vga device",
-            "CROND" 
-            } 
-        }, 
-        xsession = { 
-            file = os.getenv("HOME") .. "/.log/xsession-errors",
-            ignore = { "libpng warning: iCCP: known incorrect sRGB profile",
-            "ERROR:background_mode_manager_aura.cc", 
-            "Fontconfig error: Cannot load default config file", 
-            "Failed to connect to session manager", 
-            "W: awesome: a_glib_poll:239", 
-            "SANDBOXED", 
-            "Looking in '/etc/xdg/parcellite/parcelliterc'" 
+            ignore = { 
+                "DIGEST-MD5 common mech free",
+                "kernel: vgaarb: this pci device is not a vga device",
+                "CROND" 
             } 
         }
+        -- xsession = { 
+        --     file = os.getenv("HOME") .. "/.log/xsession-errors",
+        --     ignore = { 
+        --         "libpng warning: iCCP: known incorrect sRGB profile",
+        --         "ERROR:background_mode_manager_aura.cc", 
+        --         "Fontconfig error: Cannot load default config file", 
+        --         "Failed to connect to session manager", 
+        --         "W: awesome: a_glib_poll:239", 
+        --         "SANDBOXED", 
+        --         "Looking in '/etc/xdg/parcellite/parcelliterc'",
+        --         "cdn_chunk_downloader.cpp",
+        --         "WeatherSegment"
+        --     } 
+        -- }
     },
     naughty_timeout = 5
 }
