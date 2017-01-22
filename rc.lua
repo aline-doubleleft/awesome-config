@@ -71,10 +71,14 @@ local powerline_layout = wibox.layout.margin(powerline_widget,0,0,0,5)
 -- CPU graph
 cpu_graph = blingbling.line_graph()
 cpu_graph:set_height(18)
-cpu_graph:set_width(100)
-cpu_graph:set_show_text(false)
+cpu_graph:set_width(150)
+cpu_graph:set_show_text(true)
+cpu_graph:set_label("Load: $percent %")
 cpu_graph:set_rounded_size(0.3)
 cpu_graph:set_graph_background_color("#00000033")
+cpu_graph:set_font_size(8)
+cpu_graph:set_font({ family = "Droid Sans Mono for Powerline", weight = "normal", slang = "normal" })
+cpu_graph:set_v_margin(1)
 vicious.register(cpu_graph, vicious.widgets.cpu,'$1',2)
 
 -- CPU thermal
