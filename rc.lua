@@ -7,13 +7,9 @@ local tyrannical = require("tyrannical")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
--- Theme handling library
-local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-local vicious = require("vicious")
-require("powerline")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -43,7 +39,12 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 awesome_home = os.getenv("HOME") .. "/.config/awesome/"
+local beautiful = require("beautiful")
 beautiful.init(awesome_home .. "themes/default/theme.lua")
+local vicious = require("vicious")
+require("powerline")
+
+local blingbling = require("blingbling")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xfce4-terminal -e tmux"
@@ -64,20 +65,57 @@ divider:set_text(" ")
 hardivider = wibox.widget.textbox()
 hardivider:set_text("|")
 
--- CPU widget
-cputext = wibox.widget.textbox()
-vicious.register(cputext, vicious.widgets.cpu, " $1% ")
+-- Powerline
+local powerline_layout = wibox.layout.margin(powerline_widget,0,0,0,5)
 
-cpugraph = awful.widget.graph()
-cpugraph:set_width(50)
-cpugraph:set_background_color("#494B4F")
-cpugraph:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, 
-                    {1, "#AECF96" }}})
-vicious.register(cpugraph, vicious.widgets.cpu, "$1")
+-- CPU graph
+cpu_graph = blingbling.line_graph()
+cpu_graph:set_height(18)
+cpu_graph:set_width(100)
+cpu_graph:set_show_text(false)
+cpu_graph:set_rounded_size(0.3)
+cpu_graph:set_graph_background_color("#00000033")
+vicious.register(cpu_graph, vicious.widgets.cpu,'$1',2)
 
 -- CPU thermal
 thermalwidget = wibox.widget.textbox()
-vicious.register(thermalwidget, vicious.widgets.thermal, " $1°C ", 20, { "coretemp.0/hwmon/hwmon0", "core"} )
+vicious.register(thermalwidget, vicious.widgets.thermal, "$1°C", 20, { "coretemp.0/hwmon/hwmon0", "core"} )
+
+-- {{{ File system usage
+-- Initialize widgets
+fs = {
+  b = awful.widget.progressbar(), r = awful.widget.progressbar(),
+  h = awful.widget.progressbar(), s = awful.widget.progressbar()
+}
+
+fsboot = wibox.widget.textbox()
+fsboot:set_text('/boot:')
+
+fsroot = wibox.widget.textbox()
+fsroot:set_text('/:')
+
+fshome = wibox.widget.textbox()
+fshome:set_text('/home:')
+
+-- Progressbar properties
+for _, w in pairs(fs) do
+  w:set_vertical(true):set_ticks(true)
+  w:set_height(14):set_width(5):set_ticks_size(2)
+  w:set_border_color(beautiful.border_widget)
+  w:set_background_color(beautiful.fg_off_widget)
+  w:set_color({ type = "linear", from = { 0, 0 }, to = { 0, 20 },
+    stops = { { 0, "#AECF96" }, { 0.5, "#88A175" }, { 1, "#FF5656" }}
+  }) -- Register buttons
+  w:buttons(awful.util.table.join(
+    awful.button({ }, 1, function () awful.util.spawn("rox", false) end)
+  ))
+end -- Enable caching
+vicious.cache(vicious.widgets.fs)
+-- Register widgets
+vicious.register(fs.b, vicious.widgets.fs, "${/boot used_p}", 599)
+vicious.register(fs.r, vicious.widgets.fs, "${/ used_p}",     599)
+vicious.register(fs.h, vicious.widgets.fs, "${/home used_p}", 599)
+-- }}}
 
 -- Volume
 carddev  = "pulse"
@@ -150,6 +188,23 @@ dbus.connect_signal("ru.gentoo.kbdd", function(...)
     kbdwidget:set_markup(kbdstrings[layout])
     end
 )
+
+-- {{{ Calendar
+local calendar = blingbling.calendar(powerline_layout)
+calendar:set_link_to_external_calendar(true)
+calendar:clear_and_add_function_get_events_from(
+   function(day, month, year)
+      local f = io.popen('khal agenda --days 1 ' ..
+                            day .. '/' .. month .. '/' .. year)
+      local out = f:read("*all")
+      f:close()
+      return out
+   end
+)
+
+local powerline_calendar = wibox.layout.margin(calendar,0,0,0,5)
+
+-- }}}
 
 local layouts =
 {
@@ -241,6 +296,16 @@ tyrannical.tags = {
             "pavucontrol"
         }
     } ,
+    {
+        name        = "IM",
+        init        = false,
+
+        exclusive   = false,
+        layout      = awful.layout.suit.floating,
+        class       = {
+            "Sky", "Skype", "Slack" 
+        }
+    }
 }
 
 -- Ignore the tag "exclusive" property for the following clients (matched by classes)
@@ -304,9 +369,6 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- {{{ Wibox
--- Create a textclock widget
-mytextclock = awful.widget.textclock()
-
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -383,16 +445,24 @@ for s = 1, screen.count() do
 
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
-    right_layout:add(thermalwidget)
-    right_layout:add(hardivider)
-    right_layout:add(cputext)
-    right_layout:add(cpugraph)
     right_layout:add(divider)
     right_layout:add(pb_volume)
     right_layout:add(divider)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(kbdwidget)
-    right_layout:add(powerline_widget)
+    right_layout:add(divider)
+    right_layout:add(fshome)
+    right_layout:add(fs.h)
+    right_layout:add(divider)
+    right_layout:add(fsroot)
+    right_layout:add(fs.r)
+    right_layout:add(divider)
+    right_layout:add(fsboot)
+    right_layout:add(fs.b)
+    right_layout:add(divider)
+    right_layout:add(thermalwidget)
+    right_layout:add(cpu_graph)
+    right_layout:add(powerline_calendar)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
@@ -670,5 +740,6 @@ local xresources = awful.util.pread("xrdb -query")
 if not xresources:match(xresources_name) then
     -- Execute once for X server
     os.execute("dex -a -e Awesome")
+    os.execute("/usr/bin/gnome-keyring-daemon --start --components=ssh")
 end
 awful.util.spawn_with_shell("xrdb -merge <<< " .. "'" .. xresources_name .. ": true'")

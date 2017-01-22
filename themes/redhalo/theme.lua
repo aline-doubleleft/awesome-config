@@ -40,7 +40,8 @@ else
 end
 --}}}
 
-theme.font = "Dejavu Sans 8"
+-- theme.font = "Dejavu Sans 8"
+theme.font = "Droid Sans Mono for Powerline 8"
 
 theme.fg_normal = "#bcbcbc"
 --theme.fg_normal = "#f8f8f8"
