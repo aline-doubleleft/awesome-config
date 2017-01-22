@@ -9,6 +9,9 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+awesome_home = os.getenv("HOME") .. "/.config/awesome/"
+beautiful.init(awesome_home .. "themes/default/theme.lua")
+
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -41,10 +44,6 @@ end
 -- }}}
 
 -- {{{ Variable definitions
--- Themes define colours, icons, and wallpapers
-awesome_home = os.getenv("HOME") .. "/.config/awesome/"
-beautiful.init(awesome_home .. "themes/default/theme.lua")
-
 -- This is used later as the default terminal and editor to run.
 terminal = "xfce4-terminal -e tmux"
 editor = os.getenv("EDITOR") or "vim"
@@ -64,20 +63,9 @@ divider:set_text(" ")
 hardivider = wibox.widget.textbox()
 hardivider:set_text("|")
 
--- CPU widget
-cputext = wibox.widget.textbox()
-vicious.register(cputext, vicious.widgets.cpu, " $1% ")
-
-cpugraph = awful.widget.graph()
-cpugraph:set_width(50)
-cpugraph:set_background_color("#494B4F")
-cpugraph:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, 
-                    {1, "#AECF96" }}})
-vicious.register(cpugraph, vicious.widgets.cpu, "$1")
-
 -- CPU thermal
 thermalwidget = wibox.widget.textbox()
-vicious.register(thermalwidget, vicious.widgets.thermal, " $1°C ", 20, { "coretemp.0/hwmon/hwmon0", "core"} )
+vicious.register(thermalwidget, vicious.widgets.thermal, " $1°C", 20, { "coretemp.0/hwmon/hwmon0", "core"} )
 
 -- Volume
 carddev  = "pulse"
@@ -383,15 +371,12 @@ for s = 1, screen.count() do
 
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
-    right_layout:add(thermalwidget)
-    right_layout:add(hardivider)
-    right_layout:add(cputext)
-    right_layout:add(cpugraph)
     right_layout:add(divider)
     right_layout:add(pb_volume)
     right_layout:add(divider)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(kbdwidget)
+    right_layout:add(thermalwidget)
     right_layout:add(powerline_widget)
     right_layout:add(mylayoutbox[s])
 
