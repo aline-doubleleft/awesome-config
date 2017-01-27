@@ -71,19 +71,24 @@ local powerline_layout = wibox.layout.margin(powerline_widget,0,0,0,5)
 -- CPU graph
 cpu_graph = blingbling.line_graph()
 cpu_graph:set_height(18)
-cpu_graph:set_width(150)
-cpu_graph:set_show_text(true)
-cpu_graph:set_label("Load: $percent %")
+cpu_graph:set_width(100)
+cpu_graph:set_show_text(false)
 cpu_graph:set_rounded_size(0.3)
 cpu_graph:set_graph_background_color("#00000033")
-cpu_graph:set_font_size(8)
-cpu_graph:set_font({ family = "Droid Sans Mono for Powerline", weight = "normal", slang = "normal" })
-cpu_graph:set_v_margin(1)
 vicious.register(cpu_graph, vicious.widgets.cpu,'$1',2)
 
 -- CPU thermal
 thermalwidget = wibox.widget.textbox()
 vicious.register(thermalwidget, vicious.widgets.thermal, "$1°C", 20, { "coretemp.0/hwmon/hwmon0", "core"} )
+
+-- Mem widget
+memwidget=blingbling.line_graph()
+memwidget:set_height(18)
+memwidget:set_width(100)
+memwidget:set_graph_background_color("#00000022")
+memwidget:set_show_text(true)
+memwidget:set_font_size(8)
+vicious.register(memwidget, vicious.widgets.mem, '$1', 13)
 
 -- {{{ File system usage
 -- Initialize widgets
@@ -454,12 +459,13 @@ for s = 1, screen.count() do
     right_layout:add(divider)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(kbdwidget)
-    right_layout:add(divider)
-    right_layout:add(fshome)
-    right_layout:add(fs.h)
+    right_layout:add(memwidget)
     right_layout:add(divider)
     right_layout:add(fsroot)
     right_layout:add(fs.r)
+    right_layout:add(divider)
+    right_layout:add(fshome)
+    right_layout:add(fs.h)
     right_layout:add(divider)
     right_layout:add(fsboot)
     right_layout:add(fs.b)
