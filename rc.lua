@@ -68,8 +68,9 @@ hardivider:set_text("|")
 mycalendar = wibox.widget.textbox()    
 mycalendartimer = timer({ timeout = 5 })    
 mycalendartimer:connect_signal("timeout",    
-  function()    
-    fh = assert(io.popen("khal agenda --days 1", "r"))    
+  function()
+    agenda = "khal agenda --days 1"
+    fh = assert(io.popen(agenda .. " | [ $(wc -l) -ne 1 ] && " .. agenda .. " | grep '[0-2][0-9]:[0-2][0:9]-[0-2][0-9]:[0-2][0-9]' || " .. agenda, "r"))
     mycalendar:set_text(fh:read("*all"))    
     fh:close()    
   end    
@@ -470,7 +471,6 @@ for s = 1, screen.count() do
     right_layout:add(divider)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(kbdwidget)
-    right_layout:add(memwidget)
     right_layout:add(divider)
     right_layout:add(fsroot)
     right_layout:add(fs.r)
@@ -481,10 +481,12 @@ for s = 1, screen.count() do
     right_layout:add(fsboot)
     right_layout:add(fs.b)
     right_layout:add(divider)
+    right_layout:add(memwidget)
     right_layout:add(thermalwidget)
     right_layout:add(cpu_graph)
     right_layout:add(powerline_calendar)
     right_layout:add(mycalendar)
+    right_layout:add(divider)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
