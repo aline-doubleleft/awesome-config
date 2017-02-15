@@ -65,6 +65,17 @@ divider:set_text(" ")
 hardivider = wibox.widget.textbox()
 hardivider:set_text("|")
 
+mycalendar = wibox.widget.textbox()    
+mycalendartimer = timer({ timeout = 5 })    
+mycalendartimer:connect_signal("timeout",    
+  function()    
+    fh = assert(io.popen("khal agenda --days 1", "r"))    
+    mycalendar:set_text(fh:read("*all"))    
+    fh:close()    
+  end    
+)    
+mycalendartimer:start()
+
 -- Powerline
 local powerline_layout = wibox.layout.margin(powerline_widget,0,0,0,5)
 
@@ -473,6 +484,7 @@ for s = 1, screen.count() do
     right_layout:add(thermalwidget)
     right_layout:add(cpu_graph)
     right_layout:add(powerline_calendar)
+    right_layout:add(mycalendar)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
