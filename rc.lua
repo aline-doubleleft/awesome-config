@@ -66,7 +66,7 @@ hardivider = wibox.widget.textbox()
 hardivider:set_text("|")
 
 mycalendar = wibox.widget.textbox()    
-mycalendartimer = timer({ timeout = 5 })    
+mycalendartimer = timer({ timeout = 60 })    
 mycalendartimer:connect_signal("timeout",    
   function()
     agenda = "khal agenda --days 1"
@@ -485,6 +485,7 @@ for s = 1, screen.count() do
     right_layout:add(thermalwidget)
     right_layout:add(cpu_graph)
     right_layout:add(powerline_calendar)
+    right_layout:add(divider)
     right_layout:add(mycalendar)
     right_layout:add(divider)
     right_layout:add(mylayoutbox[s])
