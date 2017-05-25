@@ -41,6 +41,7 @@ end
 awesome_home = os.getenv("HOME") .. "/.config/awesome/"
 local beautiful = require("beautiful")
 beautiful.init(awesome_home .. "themes/default/theme.lua")
+local revelation = require("revelation")
 local vicious = require("vicious")
 require("powerline")
 
@@ -139,35 +140,41 @@ vicious.register(fs.h, vicious.widgets.fs, "${/home used_p}", 599)
 -- }}}
 
 -- Volume
-carddev  = "pulse"
-channel = "Master"
+carddev = "pulse"
+scontrol = "Speaker"
 function volume (mode, widget)
-   if mode == "update" then
-             local fd = io.popen("amixer -D " .. carddev .. " -- sget " .. channel)
-             local status = fd:read("*all")
-             fd:close()
-       
-       local volume = string.match(status, "(%d?%d?%d)%%")
-       volume = string.format("% 3d", volume)
+    local usb = os.execute("cat /proc/asound/cards | grep USB >/dev/null 2>&1")
+    if usb == 0 then
+        channel = 0
+    else
+        channel = 1
+    end
+    if mode == "update" then
+        local fd = io.popen("amixer -D " .. carddev .. " -c " .. channel .. " -- sget " .. scontrol)
+        local status = fd:read("*all")
+        fd:close()
 
-       status = string.match(status, "%[(o[^%]]*)%]")
+        local volume = string.match(status, "(%d?%d?%d)%%")
+        volume = string.format("% 3d", volume)
 
-       if string.find(status, "on", 1, true) then
-           widget:set_background_color("#000000")
-       else
-           widget:set_background_color("#cc3333")
-       end
-       widget:set_value(volume)
-   elseif mode == "up" then
-       io.popen("amixer -q -D " .. carddev .. " sset " .. channel .. " 5%+"):read("*all")
-       volume("update", widget)
-   elseif mode == "down" then
-       io.popen("amixer -q -D " .. carddev .. " sset " .. channel .. " 5%-"):read("*all")
-       volume("update", widget)
-   else
-       io.popen("amixer -D " .. carddev .. " sset " .. channel .. " toggle"):read("*all")
-       volume("update", widget)
-   end
+        status = string.match(status, "%[(o[^%]]*)%]")
+
+        if string.find(status, "on", 1, true) then
+            widget:set_background_color("#000000")
+        else
+            widget:set_background_color("#cc3333")
+        end
+        widget:set_value(volume)
+    elseif mode == "up" then
+        io.popen("amixer -q -D " .. carddev .. " -c " .. channel .. " sset " .. scontrol .. " 5%+"):read("*all")
+        volume("update", widget)
+    elseif mode == "down" then
+        io.popen("amixer -q -D " .. carddev .. " -c " .. channel .. " sset " .. scontrol .. " 5%-"):read("*all")
+        volume("update", widget)
+    else
+        io.popen("amixer -D " .. carddev .. " -c " .. channel .. " sset " .. scontrol .. " toggle"):read("*all")
+        volume("update", widget)
+    end
 end
 
 pb_volume = awful.widget.progressbar()
@@ -513,6 +520,7 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
+    awful.key({ modkey,           }, "e",      revelation),
 
     awful.key({ modkey,           }, "j",
         function ()
