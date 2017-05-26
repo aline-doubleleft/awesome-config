@@ -143,12 +143,8 @@ vicious.register(fs.h, vicious.widgets.fs, "${/home used_p}", 599)
 carddev = "pulse"
 scontrol = "Speaker"
 function volume (mode, widget)
-    local usb = os.execute("cat /proc/asound/cards | grep USB >/dev/null 2>&1")
-    if usb == 0 then
-        channel = 0
-    else
-        channel = 1
-    end
+    -- it returns either channel = 0, when USB is connected or channel = 1 otherwise.
+    local channel = os.execute("cat /proc/asound/cards | grep USB >/dev/null 2>&1")
     if mode == "update" then
         local fd = io.popen("amixer -D " .. carddev .. " -c " .. channel .. " -- sget " .. scontrol)
         local status = fd:read("*all")
