@@ -144,7 +144,7 @@ carddev = "pulse"
 scontrol = "Speaker"
 function volume (mode, widget)
     -- it returns either channel = 0, when USB is connected or channel = 1 otherwise.
-    local channel = os.execute("cat /proc/asound/cards | grep USB >/dev/null 2>&1")
+    local channel = io.popen'cat /proc/asound/cards | grep -q USB && \necho _$? || \necho _$?':read'*a':match'.*%D(%d+)'+0
     if mode == "update" then
         local fd = io.popen("amixer -D " .. carddev .. " -c " .. channel .. " -- sget " .. scontrol)
         local status = fd:read("*all")
